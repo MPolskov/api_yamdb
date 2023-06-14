@@ -34,8 +34,7 @@ class GenreViewSet(CustomViewSet):
 
 class TitleViewSet(ModelViewSet):
     queryset = Title.objects.all()
-    # permission_classes = (IsAdministrator | IsAuthenticatedOrReadOnly, )
-    permission_classes = (IsAdministrator, )
+    permission_classes = (IsAdministrator | IsAuthenticatedOrReadOnly, )
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':
