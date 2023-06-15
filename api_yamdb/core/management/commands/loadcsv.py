@@ -58,6 +58,8 @@ class Command(BaseCommand):
             objects = []
             for row in csvreader:
                 for column, value in row.items():
+                    if model == GenreTitle:
+                        break
                     field = model._meta.get_field(column)
                     if type(field) == related.ForeignKey:
                         rel_item = field.related_model.objects.get(pk=value)
@@ -80,7 +82,6 @@ class Command(BaseCommand):
             filename = params['filename']
             if options[params['full']] or options['all']:
                 need_help = False
-                # self.load_csv(model, filename)
                 try:
                     self.load_csv(model, filename)
                 except Exception as error:
