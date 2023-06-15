@@ -19,3 +19,12 @@ class User(AbstractUser):
         choices=ROLES,
         default='user',
     )
+    confirmation_code = models.CharField(
+        'Проверочный код',
+        max_length=40,
+        blank=True,
+        null=True,
+    )
+
+    def __str__(self):
+        return self.username
