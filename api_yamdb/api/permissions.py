@@ -9,7 +9,8 @@ def is_role(request, role):
 
 class IsAdministrator(BasePermission):
     def has_permission(self, request, view):
-        return is_role(request, 'admin')
+        return (is_role(request, 'admin')
+                or request.user.is_superuser)
 
 
 class IsModerator(BasePermission):
