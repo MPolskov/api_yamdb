@@ -24,7 +24,7 @@ class BaseModel(models.Model):
         abstract = True
 
     def to_dict(self):
-        return {"slug": self.slug, "name": self.name}
+        return {'slug': self.slug, 'name': self.name}
 
     def __str__(self):
         return self.name
@@ -39,25 +39,25 @@ class Genre(BaseModel):
 
 
 class Title(models.Model):
-    name = models.CharField(verbose_name="Название", max_length=256)
+    name = models.CharField(verbose_name='Название', max_length=256)
     year = models.IntegerField(
-        verbose_name="Год выпуска",
+        verbose_name='Год выпуска',
         validators=[
             MinValueValidator(limit_value=1900),
             MaxValueValidator(limit_value=current_year())
         ],
     )
-    rating = models.IntegerField(verbose_name="Рейтинг", null=True, blank=True)
-    description = models.TextField(verbose_name="Описание")
+    rating = models.IntegerField(verbose_name='Рейтинг', null=True, blank=True)
+    description = models.TextField(verbose_name='Описание')
     genre = models.ManyToManyField(
         Genre,
-        through="GenreTitle",
-        verbose_name="Жанр",
+        through='GenreTitle',
+        verbose_name='Жанр',
     )
     category = models.ForeignKey(
         Category,
         related_name='titles',
-        verbose_name="Категория",
+        verbose_name='Категория',
         on_delete=models.SET_NULL,
         null=True,
     )
