@@ -1,7 +1,6 @@
 from rest_framework import mixins
 from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
-from django_filters.rest_framework import DjangoFilterBackend
 
 from reviews.models import Category, Genre, Title
 from .permissions import IsAdministratorOrReadOnly
@@ -33,10 +32,28 @@ class GenreViewSet(CustomViewSet):
 
 
 class TitleViewSet(ModelViewSet):
-    queryset = Title.objects.all().order_by('id')
-    filter_backends = (DjangoFilterBackend, )
-    filterset_fields = ('category', 'genre', 'name', 'year')
     permission_classes = (IsAdministratorOrReadOnly, )
+
+    def get_queryset(self):
+        queryset = Title.objects.all().order_by('id')
+        filterset_fields = ('name', 'year')
+        filterset_slug_fields = ('genre', 'category')
+        kwargs = {}
+
+        for field in filterset_fields:
+            value = self.request.query_params.get(field)
+            if value:
+                kwargs[field] = value
+
+        for field in filterset_slug_fields:
+            value = self.request.query_params.get(field)
+            if value:
+                kwargs[f'{field}__slug'] = value
+
+        if kwargs:
+            queryset = queryset.filter(**kwargs)
+
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':
