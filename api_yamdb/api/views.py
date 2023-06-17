@@ -23,17 +23,17 @@ class CustomViewSet(GenericViewSet, mixins.ListModelMixin,
 
 
 class CategoryViewSet(CustomViewSet):
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('id')
     serializer_class = CategorySerializer
 
 
 class GenreViewSet(CustomViewSet):
-    queryset = Genre.objects.all()
+    queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
 
 
 class TitleViewSet(ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().order_by('id')
     filter_backends = (DjangoFilterBackend, )
     filterset_fields = ('category', 'genre', 'name', 'year')
     permission_classes = (IsAdministratorOrReadOnly, )
