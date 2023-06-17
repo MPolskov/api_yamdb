@@ -6,25 +6,25 @@ from reviews.models import Category, Genre, Title
 
 
 class CustomSlugRelatedField(serializers.SlugRelatedField):
-
     def to_representation(self, obj):
         return obj.to_dict()
 
 
-class CategorySerializer(serializers.ModelSerializer):
-
+class BaseModelSerializer(serializers.ModelSerializer):
     class Meta:
+        fields = ('name', 'slug')
+        lookup_field = 'slug'
+        abstract = True
+
+
+class CategorySerializer(BaseModelSerializer):
+    class Meta(BaseModelSerializer.Meta):
         model = Category
-        fields = ('name', 'slug')
-        lookup_field = 'slug'
 
 
-class GenreSerializer(serializers.ModelSerializer):
-
-    class Meta:
+class GenreSerializer(BaseModelSerializer):
+    class Meta(BaseModelSerializer.Meta):
         model = Genre
-        fields = ('name', 'slug')
-        lookup_field = 'slug'
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -35,17 +35,21 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'rating',
-                  'description',
-                  'genre',
-                  'category')
+                  'description', 'genre', 'category')
+        ordering = ('pk', )
 
     def to_internal_value(self, data):
         if 'genre' in data:
+            data = data.copy()
             genres = data.pop('genre')
         else:
             genres = None
         ret = super().to_internal_value(data)
         if genres:
+            if type(genres) != list:
+                raise ValidationError(
+                    {f'Ожидался {type(list)} вместо {type(genres)}': genres}
+                )
             result = []
             errors = OrderedDict()
             for slug in genres:
@@ -79,6 +83,4 @@ class TitleListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'rating',
-                  'description',
-                  'genre',
-                  'category')
+                  'description', 'genre', 'category')
