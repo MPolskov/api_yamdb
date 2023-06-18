@@ -18,8 +18,15 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
-    username = serializers.CharField(required=True)
+    email = serializers.EmailField(
+        max_length=254,
+        required=True
+    )
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]+$',
+        max_length=150,
+        required=True
+    )
 
     class Meta:
         model = User
@@ -35,7 +42,7 @@ class UserCreateSerializer(serializers.Serializer):
     def validate(self, data):
         if data['username'] == 'me':
             raise serializers.ValidationError(
-                'Выберите другой username')  # TODO: Константы!
+                'Выберите другое имя пользователя')  # TODO: Константы!
         return data
 
 
