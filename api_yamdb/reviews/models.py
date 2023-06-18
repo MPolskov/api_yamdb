@@ -1,8 +1,11 @@
 import datetime
 from django.db import models
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
 from django.core.validators import (
     RegexValidator, MinValueValidator, MaxValueValidator
 )
+from users.models import User
 
 
 def current_year():
@@ -82,3 +85,57 @@ class GenreTitle(models.Model):
 
     def __str__(self):
         return f'{self.genre} {self.title}'
+    
+
+class Review(models.Model):
+    title = models.ForeignKey(
+        Title,
+        verbose_name='Произведение',
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        null=False
+    )
+    text = models.TextField(
+        verbose_name='Текст',
+    )
+    author = models.ForeignKey(
+        User,
+        verbose_name='Автор',
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        null=False
+    )
+    score = models.PositiveIntegerField(
+        verbose_name='Рейтинг',
+        null=False,
+        validators=(
+            MinValueValidator(1, 'Минимум 1',),
+            MaxValueValidator(10, 'Максимум 10',)
+        ),
+    )
+    pub_date = models.DateTimeField(
+        verbose_name='Дата публикации',
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        ordering = ['pub_date']
+
+        constraints = (
+            models.UniqueConstraint(
+                fields=('title', 'author',),
+                name='unique_title_author'
+            ),
+        )
+
+    def __str__(self):
+        return self.text[:15]
+
+
+@receiver([post_delete, post_save], sender=Review)
+def title_rating_change(sender, instance, using, **kwargs):
+    instance.title.rating = instance.title.reviews.aggregate(
+        models.Avg('score'))['score__avg']
+    instance.title.save()
