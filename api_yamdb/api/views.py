@@ -2,13 +2,19 @@ from rest_framework import mixins
 from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
+from django.shortcuts import get_object_or_404
+
 from reviews.models import Category, Genre, Title
-from .permissions import IsAdministratorOrReadOnly
+from .permissions import (
+    IsAdministratorOrReadOnly,
+    IsAuthorModeratorAdminOrReadOnly,
+)
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
     TitleSerializer,
     TitleListSerializer,
+    ReviewSerializer,
 )
 
 
@@ -59,3 +65,17 @@ class TitleViewSet(ModelViewSet):
         if self.action == 'list' or self.action == 'retrieve':
             return TitleListSerializer
         return TitleSerializer
+
+
+class ReviewViewSet(ModelViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = (IsAuthorModeratorAdminOrReadOnly,)
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        return title.reviews.all()
+
+    def perform_create(self, serializer):
+        title_id = self.kwargs.get("title_id")
+        title = get_object_or_404(Title, pk=title_id)
+        serializer.save(author=self.request.user, title=title)

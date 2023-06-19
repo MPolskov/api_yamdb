@@ -1,8 +1,9 @@
 from collections import OrderedDict
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework.relations import SlugRelatedField
 
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review
 
 
 class CustomSlugRelatedField(serializers.SlugRelatedField):
@@ -84,3 +85,38 @@ class TitleListSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category')
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    title = serializers.SlugRelatedField(
+        slug_field='name',
+        queryset=Title.objects.all(),
+        required=False
+    )
+    author = SlugRelatedField(
+        default=serializers.CurrentUserDefault(),
+        read_only=True,
+        slug_field='username'
+    )
+
+    class Meta:
+        fields = ('id', 'title', 'text', 'author', 'score', 'pub_date')
+        model = Review
+
+    def validate_score(self, value):
+        if 0 > value > 10:
+            raise serializers.ValidationError('Выберите оценку от 1 до 10')
+        return value
+
+    def validate(self, data):
+        if self.context['request'].method != 'POST':
+            return data
+        user = self.context['request'].user
+        title_id = self.context["view"].kwargs.get("title_id")
+        if Review.objects.filter(
+            title_id=title_id, author_id=user.id
+        ).exists():
+            raise serializers.ValidationError(
+                "Можно оставить только 1 отзыв на произведение."
+            )
+        return data
