@@ -5,14 +5,14 @@ STAFF_ROLES = ('moderator', 'admin')
 
 def is_role(request, role):
     if request.user and request.user.is_authenticated:
-        return request.user.role == role
+        return (request.user.role == role
+                or request.user.is_superuser)
     return False
 
 
 class IsAdministrator(BasePermission):
     def has_permission(self, request, view):
-        return (is_role(request, 'admin')
-                or request.user.is_superuser)
+        return is_role(request, 'admin')
 
 
 class IsModerator(BasePermission):
