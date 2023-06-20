@@ -42,7 +42,7 @@ class TitleSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         if 'genre' in data:
             data = data.copy()
-            genres = data['genre']
+            genres = data.pop('genre')
             data['genre'] = []
         else:
             genres = None
