@@ -34,11 +34,15 @@ class BaseModel(models.Model):
 
 
 class Category(BaseModel):
-    pass
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
 
 class Genre(BaseModel):
-    pass
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
 
 class Title(models.Model):
@@ -65,6 +69,10 @@ class Title(models.Model):
         null=True,
     )
 
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+
     def __str__(self):
         return self.name
 
@@ -82,6 +90,10 @@ class GenreTitle(models.Model):
             models.UniqueConstraint(fields=['genre', 'title'],
                                     name='unique_follow')
         ]
+
+    class Meta:
+        verbose_name = 'Жанры и Произведения'
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return f'{self.genre} {self.title}'
