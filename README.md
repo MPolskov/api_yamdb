@@ -1,6 +1,34 @@
 # Проект YaMDb
 Проект API для сбора озывов пользователей на произведения.
 
+## Установка и запуск проекта:
+Клонировать репозиторий и перейти в него в командной строке:
+```
+git clone git@github.com:MPolskov/api_yamdb.git
+```
+```
+cd api_yamdb
+```
+Cоздать и активировать виртуальное окружение:
+```
+py -3.9 -m venv venv
+```
+```
+source ./venv/Scripts/activate
+```
+Установить зависимости из файла requirements.txt:
+```
+python -m pip install -r requirements.txt
+```
+Выполнить миграции:
+```
+python api_yamdb/manage.py migrate
+```
+Запустить сервер:
+```
+python api_yamdb/manage.py runserver 0.0.0.0:8000
+```
+
 ## Импорт тестовых данных
 Тестовые данные для базы данных проекта расположены в папке /static.
 
