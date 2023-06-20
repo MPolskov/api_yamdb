@@ -42,7 +42,8 @@ class TitleSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         if 'genre' in data:
             data = data.copy()
-            genres = data.pop('genre')
+            genres = data['genre']
+            data['genre'] = []
         else:
             genres = None
         ret = super().to_internal_value(data)
@@ -75,6 +76,20 @@ class TitleSerializer(serializers.ModelSerializer):
             for genre in genres:
                 title.genre.add(genre)
             return title
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.year = validated_data.get('year', instance.year)
+        instance.rating = validated_data.get('rating', instance.rating)
+        instance.category = validated_data.get('category', instance.category)
+        instance.description = validated_data.get(
+            'description', instance.description
+        )
+        if 'genre' in validated_data:
+            genres_data = validated_data.pop('genre')
+            instance.genre.set(genres_data)
+        instance.save()
+        return instance
 
 
 class TitleListSerializer(serializers.ModelSerializer):
