@@ -7,6 +7,11 @@ from django.conf import settings
 from reviews.models import Category, Genre, Title, GenreTitle, Comment, Review
 from users.models import User
 
+MSG_NOTFOUND = '{0} - файл не найден!'
+MSG_SKIP = '{0}: Пропущено! База данных содержит объекты.'
+MSG_SUCCESS = '{0}: Тестовые данные успешно загружены.'
+MSG_ERROR = 'Ошибка обработки файла "{0}" для модели "{1}"\n{2}'
+
 
 class Command(BaseCommand):
     data_dir = os.path.join(settings.STATICFILES_DIRS[0], 'data')
@@ -61,7 +66,7 @@ class Command(BaseCommand):
         """Загрузка объектов из .csv файла."""
         file = os.path.join(self.data_dir, filename)
         if not os.path.isfile(file):
-            raise FileNotFoundError(f'{file} - файл не найден!')
+            raise FileNotFoundError(MSG_NOTFOUND.format(file))
 
         with open(file, encoding='utf-8') as f:
             csvreader = csv.DictReader(f)
@@ -79,8 +84,7 @@ class Command(BaseCommand):
                     if model.objects.all().count() > 0:
                         self.stdout.write(
                             self.style.WARNING(
-                                f'{model.__name__}: Пропущено! База данных '
-                                'содержит объекты.'
+                                MSG_SKIP.format(model.__name__)
                             )
                         )
                         continue
@@ -88,13 +92,11 @@ class Command(BaseCommand):
                         self.load_csv(model, filename)
                     except Exception as error:
                         raise CommandError(
-                            f'Ошибка обработки файла "{filename}" '
-                            f'для модели "{model.__name__}"\n{error}'
+                            MSG_ERROR.format(filename, model.__name__, error)
                         )
                     self.stdout.write(
                         self.style.SUCCESS(
-                            f'{model.__name__}: Тестовые данные успешно '
-                            'загружены.'
+                            MSG_SUCCESS.format(model.__name__)
                         )
                     )
         else:
