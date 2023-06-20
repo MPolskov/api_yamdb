@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models.fields import related
 
 from django.conf import settings
-from reviews.models import Category, Genre, Title, GenreTitle
+from reviews.models import Category, Genre, Title, GenreTitle, Comment, Review
 from users.models import User
 
 
@@ -16,12 +16,12 @@ class Command(BaseCommand):
     )
     MODELS = {
         Category: {'filename': 'category.csv', 'short': 'c'},
-        # Comment: {'filename': 'comments.csv', 'short': 'co'},
         Genre: {'filename': 'genre.csv', 'short': 'g'},
         Title: {'filename': 'titles.csv', 'short': 't'},
         GenreTitle: {'filename': 'genre_title.csv', 'short': 'gt'},
-        # Review: {'filename': 'review.csv', 'short': 'r'},
         User: {'filename': 'users.csv', 'short': 'u'},
+        Review: {'filename': 'review.csv', 'short': 'r'},
+        Comment: {'filename': 'comments.csv', 'short': 'co'},
     }
 
     def add_arguments(self, parser):
@@ -46,12 +46,16 @@ class Command(BaseCommand):
 
     def get_rel_item(self, model, row):
         """Извлечение объектов из связанных моделей."""
-        if model != GenreTitle:
-            for column, value in row.items():
-                field = model._meta.get_field(column)
-                if type(field) == related.ForeignKey:
-                    rel_item = field.related_model.objects.get(pk=value)
-                    row[column] = rel_item
+        exclude_models = (GenreTitle, Review, Comment)
+        exclude_fields = ('genre_id', 'title_id', 'review_id')
+
+        for column, value in row.items():
+            if (model in exclude_models and column in exclude_fields):
+                continue
+            field = model._meta.get_field(column)
+            if type(field) == related.ForeignKey:
+                rel_item = field.related_model.objects.get(pk=value)
+                row[column] = rel_item
 
     def load_csv(self, model, filename):
         """Загрузка объектов из .csv файла."""
