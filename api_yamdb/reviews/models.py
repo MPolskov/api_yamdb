@@ -85,7 +85,7 @@ class GenreTitle(models.Model):
 
     def __str__(self):
         return f'{self.genre} {self.title}'
-    
+
 
 class Review(models.Model):
     title = models.ForeignKey(
@@ -139,3 +139,36 @@ def title_rating_change(sender, instance, using, **kwargs):
     instance.title.rating = instance.title.reviews.aggregate(
         models.Avg('score'))['score__avg']
     instance.title.save()
+
+
+class Comment(models.Model):
+    review = models.ForeignKey(
+        Review,
+        verbose_name='Отзыв',
+        on_delete=models.CASCADE,
+        related_name='comments',
+        null=False
+    )
+    text = models.TextField(
+        verbose_name='Текст',
+    )
+    author = models.ForeignKey(
+        User,
+        verbose_name='Пользователь',
+        on_delete=models.CASCADE,
+        related_name='comments',
+        null=False
+    )
+    pub_date = models.DateTimeField(
+        verbose_name='Дата публикации',
+        auto_now_add=True,
+        db_index=True
+    )
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        ordering = ['pub_date']
+
+    def __str__(self):
+        return self.text[:15]

@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.relations import SlugRelatedField
 
-from reviews.models import Category, Genre, Title, Review
+from reviews.models import Category, Genre, Title, Review, Comment
 
 
 class CustomSlugRelatedField(serializers.SlugRelatedField):
@@ -112,11 +112,23 @@ class ReviewSerializer(serializers.ModelSerializer):
         if self.context['request'].method != 'POST':
             return data
         user = self.context['request'].user
-        title_id = self.context["view"].kwargs.get("title_id")
+        title_id = self.context['view'].kwargs.get('title_id')
         if Review.objects.filter(
             title_id=title_id, author_id=user.id
         ).exists():
             raise serializers.ValidationError(
-                "Можно оставить только 1 отзыв на произведение."
+                'Можно оставить только 1 отзыв на произведение.'
             )
         return data
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = SlugRelatedField(
+        default=serializers.CurrentUserDefault(),
+        read_only=True,
+        slug_field='username'
+    )
+
+    class Meta:
+        fields = ('id', 'text', 'author', 'pub_date')
+        model = Comment
