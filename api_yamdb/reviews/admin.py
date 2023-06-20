@@ -5,7 +5,12 @@ from .models import Category, Genre, Title, GenreTitle, Review, Comment
 
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'year', 'name', 'description', 'get_genres', 'category')
+    list_display = ('pk',
+                    'year',
+                    'name',
+                    'description',
+                    'get_genres',
+                    'category')
     search_fields = ('name',)
     list_filter = ('year',)
 
