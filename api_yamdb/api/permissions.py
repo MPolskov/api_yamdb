@@ -15,11 +15,6 @@ class IsAdministrator(BasePermission):
         return is_role(request, 'admin')
 
 
-class IsModerator(BasePermission):
-    def has_permission(self, request, view):
-        return is_role(request, 'moderator')
-
-
 class IsAdministratorOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         return (request.method in SAFE_METHODS

@@ -2,6 +2,8 @@ from rest_framework import serializers
 
 from .models import User
 
+UNIQ_NAME_ERROR = 'Выберите другое имя пользователя'
+
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -42,7 +44,7 @@ class UserCreateSerializer(serializers.Serializer):
     def validate(self, data):
         if data['username'] == 'me':
             raise serializers.ValidationError(
-                'Выберите другое имя пользователя')  # TODO: Константы!
+                UNIQ_NAME_ERROR)
         return data
 
 

@@ -5,6 +5,9 @@ from rest_framework.relations import SlugRelatedField
 
 from reviews.models import Category, Genre, Title, Review, Comment
 
+REVIEW_ERROR = 'Можно оставить только 1 отзыв на произведение.'
+SCORE_ERROR = 'Выберите оценку от 1 до 10'
+
 
 class CustomSlugRelatedField(serializers.SlugRelatedField):
     def to_representation(self, obj):
@@ -120,7 +123,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate_score(self, value):
         if 0 > value > 10:
-            raise serializers.ValidationError('Выберите оценку от 1 до 10')
+            raise serializers.ValidationError(SCORE_ERROR)
         return value
 
     def validate(self, data):
@@ -132,7 +135,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             title_id=title_id, author_id=user.id
         ).exists():
             raise serializers.ValidationError(
-                'Можно оставить только 1 отзыв на произведение.'
+                REVIEW_ERROR
             )
         return data
 

@@ -18,9 +18,10 @@ from .serializers import (
     UserTokenSerializer,
 )
 
-# TODO: Константы перенести в отдельный файл
 VALID_ERROR = 'Такой логин или email уже существуют'
 CONF_CODE_ERROR = 'Неверный проверочный код'
+EMAIL_HEADER = 'Код подтверждения'
+EMAIL_MSG = 'Ваш код подтверждения для получения токена: {}'
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -73,8 +74,8 @@ class UserSignUpView(APIView):
         user.save()
 
         send_mail(
-            subject='Код подтверждения',  # TODO: Перевести строки в константы
-            message=f'Ваш код подтверждения: {confirmation_code}',
+            subject=EMAIL_HEADER,
+            message=EMAIL_MSG.format(confirmation_code),
             from_email=settings.AUTH_EMAIL,
             recipient_list=(user.email,),
             fail_silently=False,
