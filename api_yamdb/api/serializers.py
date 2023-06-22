@@ -44,22 +44,28 @@ class TitleSerializer(serializers.ModelSerializer):
                   'description', 'genre', 'category')
         ordering = ('pk', )
 
+    def type_validate(self, target, obj):
+        """Проверка соответствия типа объекта."""
+        if type(obj) != target:
+            raise ValidationError(
+                {TITLE_ERROR.format(type(target), type(obj)): obj}
+            )
+
     def to_internal_value(self, data):
         if 'genre' in data:
             data = data.copy()
-            genres = data.pop('genre')
+            slugs = data.pop('genre')
             data['genre'] = []
         else:
-            genres = None
+            slugs = None
         ret = super().to_internal_value(data)
-        if genres:
-            if type(genres) != list:
-                raise ValidationError(
-                    {TITLE_ERROR.format(type(list), type(genres)): genres}
-                )
+        if slugs:
+            self.type_validate(list, slugs)
             result = []
             errors = OrderedDict()
-            for slug in genres:
+            # genres = Genre.objects.filter(slug_in=slugs)
+            for slug in slugs:
+                self.type_validate(str, slug)
                 try:
                     genre = Genre.objects.get(slug=slug)
                 except Exception as error:
