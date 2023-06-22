@@ -8,6 +8,7 @@ from reviews.models import Category, Genre, Title, Review, Comment
 
 REVIEW_ERROR = 'Можно оставить только 1 отзыв на произведение.'
 SCORE_ERROR = 'Выберите оценку от 1 до 10'
+TITLE_ERROR = 'Ожидался {0} вместо {1}'
 
 
 class CustomSlugRelatedField(serializers.SlugRelatedField):
@@ -54,7 +55,7 @@ class TitleSerializer(serializers.ModelSerializer):
         if genres:
             if type(genres) != list:
                 raise ValidationError(
-                    {f'Ожидался {type(list)} вместо {type(genres)}': genres}
+                    {TITLE_ERROR.format(type(list), type(genres)): genres}
                 )
             result = []
             errors = OrderedDict()
