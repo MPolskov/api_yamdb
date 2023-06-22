@@ -63,12 +63,12 @@ class TitleSerializer(serializers.ModelSerializer):
             self.type_validate(list, slugs)
             result = []
             errors = OrderedDict()
-            # genres = Genre.objects.filter(slug_in=slugs)
+            genres = Genre.objects.filter(slug__in=slugs)
             for slug in slugs:
                 self.type_validate(str, slug)
                 try:
-                    genre = Genre.objects.get(slug=slug)
-                except Exception as error:
+                    genre = genres.get(slug=slug)
+                except Genre.DoesNotExist as error:
                     errors[slug] = error
                 else:
                     result.append(genre)
