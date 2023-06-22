@@ -131,9 +131,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             return data
         user = self.context['request'].user
         title_id = self.context['view'].kwargs.get('title_id')
-        if Review.objects.filter(
-            title_id=title_id, author_id=user.id
-        ).exists():
+        if user.reviews.filter(title_id=title_id).exists():
             raise serializers.ValidationError(
                 REVIEW_ERROR
             )
