@@ -78,15 +78,11 @@ class TitleSerializer(serializers.ModelSerializer):
         return ret
 
     def create(self, validated_data):
-        if 'genre' not in validated_data:
-            title = Title.objects.create(**validated_data)
-            return title
-        else:
-            genres = validated_data.pop('genre')
-            title = Title.objects.create(**validated_data)
-            for genre in genres:
-                title.genre.add(genre)
-            return title
+        genres = 'genre' in validated_data and validated_data.pop('genre')
+        title = Title.objects.create(**validated_data)
+        if genres:
+            title.genre.set(genres)
+        return title
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
