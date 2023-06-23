@@ -4,6 +4,8 @@ from django.core import validators
 from .models import User
 
 UNIQ_NAME_ERROR = 'Выберите другое имя пользователя'
+ERROR_REGEX_MSG = 'Имя пользователя содержит недопустимые символы'
+REGEX = r'^[\w.@+-]+\Z'
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -26,13 +28,13 @@ class UserCreateSerializer(serializers.Serializer):
         required=True
     )
     username = serializers.RegexField(
-        regex=r'^[\w.@+-]+\Z',
+        regex=REGEX,
         max_length=User.USERNAME_MAX_LENGTH,
         required=True,
         validators=(
             validators.RegexValidator(
-                r'^[\w.@+-]+\Z',
-                'Имя пользователя содержит недопустимые символы'),
+                REGEX,
+                ERROR_REGEX_MSG),
         )
     )
 
