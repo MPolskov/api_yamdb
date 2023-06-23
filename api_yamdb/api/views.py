@@ -29,12 +29,12 @@ class CustomViewSet(GenericViewSet, mixins.ListModelMixin,
 
 
 class CategoryViewSet(CustomViewSet):
-    queryset = Category.objects.all().order_by('id')
+    queryset = Category.objects.order_by('id')
     serializer_class = CategorySerializer
 
 
 class GenreViewSet(CustomViewSet):
-    queryset = Genre.objects.all().order_by('id')
+    queryset = Genre.objects.order_by('id')
     serializer_class = GenreSerializer
 
 
@@ -42,7 +42,7 @@ class TitleViewSet(ModelViewSet):
     permission_classes = (IsAdministratorOrReadOnly, )
 
     def get_queryset(self):
-        queryset = Title.objects.all().order_by('id')
+        queryset = Title.objects.order_by('id')
         filterset_fields = ('name', 'year')
         filterset_slug_fields = ('genre', 'category')
         kwargs = {}
