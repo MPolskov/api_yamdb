@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.core import validators
 
 from .models import User
 
@@ -21,13 +22,18 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserCreateSerializer(serializers.Serializer):
     email = serializers.EmailField(
-        max_length=254,
+        max_length=User.EMAIL_MAX_LENGTH,
         required=True
     )
     username = serializers.RegexField(
-        regex=r'^[\w.@+-]+$',
-        max_length=150,
-        required=True
+        regex=r'^[\w.@+-]+\Z',
+        max_length=User.USERNAME_MAX_LENGTH,
+        required=True,
+        validators=(
+            validators.RegexValidator(
+                r'^[\w.@+-]+\Z',
+                'Имя пользователя содержит недопустимые символы'),
+        )
     )
 
     class Meta:
@@ -44,7 +50,8 @@ class UserCreateSerializer(serializers.Serializer):
     def validate(self, data):
         if data['username'] == 'me':
             raise serializers.ValidationError(
-                UNIQ_NAME_ERROR)
+                UNIQ_NAME_ERROR
+            )
         return data
 
 

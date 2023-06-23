@@ -1,6 +1,8 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
-STAFF_ROLES = ('moderator', 'admin')
+from users.models import User
+
+STAFF_ROLES = (User.MODERATOR, User.ADMIN)
 
 
 def is_role(request, role):
@@ -12,13 +14,13 @@ def is_role(request, role):
 
 class IsAdministrator(BasePermission):
     def has_permission(self, request, view):
-        return is_role(request, 'admin')
+        return is_role(request, User.ADMIN)
 
 
 class IsAdministratorOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         return (request.method in SAFE_METHODS
-                or is_role(request, 'admin'))
+                or is_role(request, User.ADMIN))
 
 
 class IsAuthorModeratorAdminOrReadOnly(BasePermission):
