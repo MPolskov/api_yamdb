@@ -85,16 +85,11 @@ class TitleSerializer(serializers.ModelSerializer):
         return title
 
     def update(self, instance, validated_data):
-        instance.name = validated_data.get('name', instance.name)
-        instance.year = validated_data.get('year', instance.year)
-        instance.rating = validated_data.get('rating', instance.rating)
-        instance.category = validated_data.get('category', instance.category)
-        instance.description = validated_data.get(
-            'description', instance.description
-        )
-        if 'genre' in validated_data:
-            genres_data = validated_data.pop('genre')
-            instance.genre.set(genres_data)
+        for key in validated_data.keys():
+            if key != 'genre':
+                setattr(instance, key, validated_data.get(key))
+            else:
+                instance.genre.set(validated_data.get('genre'))
         instance.save()
         return instance
 
