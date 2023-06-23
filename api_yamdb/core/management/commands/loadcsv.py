@@ -1,16 +1,20 @@
 import os
 import csv
-from django.core.management.base import BaseCommand, CommandError
-from django.db.models.fields import related
+import logging
 
+from django.core.management.base import BaseCommand
+from django.db.models.fields import related
 from django.conf import settings
+
 from reviews.models import Category, Genre, Title, GenreTitle, Comment, Review
 from users.models import User
 
 MSG_NOTFOUND = '{0} - файл не найден!'
 MSG_SKIP = '{0}: Пропущено! База данных содержит объекты.'
 MSG_SUCCESS = '{0}: Тестовые данные успешно загружены.'
-MSG_ERROR = 'Ошибка обработки файла "{0}" для модели "{1}"\n{2}'
+MSG_ERROR = 'Ошибка обработки файла "{0}" для модели "{1}". {2}'
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -28,6 +32,18 @@ class Command(BaseCommand):
         Review: {'filename': 'review.csv', 'short': 'r'},
         Comment: {'filename': 'comments.csv', 'short': 'co'},
     }
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Колоризация логера."""
+        logging.addLevelName(
+            logging.WARNING,
+            "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.WARNING)
+        )
+        logging.addLevelName(
+            logging.ERROR,
+            "\033[1;41m%s\033[1;0m" % logging.getLevelName(logging.ERROR)
+        )
+        super().__init__(*args, **kwargs)
 
     def add_arguments(self, parser):
         self.args_list = ('all',)
@@ -82,22 +98,15 @@ class Command(BaseCommand):
                 filename = params['filename']
                 if options[model._meta.model_name] or options['all']:
                     if model.objects.all().count() > 0:
-                        self.stdout.write(
-                            self.style.WARNING(
-                                MSG_SKIP.format(model.__name__)
-                            )
-                        )
+                        logger.warning(MSG_SKIP.format(model.__name__))
                         continue
                     try:
                         self.load_csv(model, filename)
                     except Exception as error:
-                        raise CommandError(
+                        logger.error(
                             MSG_ERROR.format(filename, model.__name__, error)
                         )
-                    self.stdout.write(
-                        self.style.SUCCESS(
-                            MSG_SUCCESS.format(model.__name__)
-                        )
-                    )
+                    else:
+                        logger.info(MSG_SUCCESS.format(model.__name__))
         else:
             self.print_help('manage.py', 'loadcsv')
