@@ -76,7 +76,7 @@ class UserSignUpView(APIView):
         send_mail(
             subject=EMAIL_HEADER,
             message=EMAIL_MSG.format(confirmation_code),
-            from_email=settings.AUTH_EMAIL,
+            from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=(user.email,),
             fail_silently=False,
         )

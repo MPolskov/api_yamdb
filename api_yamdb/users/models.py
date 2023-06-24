@@ -2,23 +2,30 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import RegexValidator
 
-ROLES = (
-    ('user', 'Пользователь'),
-    ('moderator', 'Модератор'),
-    ('admin', 'Администратор')
-)
-
 
 class User(AbstractUser):
+    USERNAME_MAX_LENGTH = 150
+    EMAIL_MAX_LENGTH = 254
+
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    USER = 'user'
+
+    ROLES = (
+        (USER, 'Пользователь'),
+        (MODERATOR, 'Модератор'),
+        (ADMIN, 'Администратор')
+    )
+
     username = models.CharField(
         'Логин',
-        max_length=150,
+        max_length=USERNAME_MAX_LENGTH,
         unique=True,
-        validators=([RegexValidator(regex=r'^[\w.@+-]+$')])
+        validators=([RegexValidator(regex=r'^[\w.@+-]+\Z')])
     )
     email = models.EmailField(
         'E-mail',
-        max_length=254,
+        max_length=EMAIL_MAX_LENGTH,
         unique=True
     )
     bio = models.TextField(
