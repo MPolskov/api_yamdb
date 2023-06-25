@@ -147,7 +147,7 @@ class Review(models.Model):
         )
 
     def __str__(self):
-        return self.text[LENGTH_TEXT]
+        return self.text[:LENGTH_TEXT]
 
 
 @receiver([post_delete, post_save], sender=Review)
@@ -187,4 +187,4 @@ class Comment(models.Model):
         ordering = ['pub_date']
 
     def __str__(self):
-        return self.text[LENGTH_TEXT]
+        return self.text[:LENGTH_TEXT]
