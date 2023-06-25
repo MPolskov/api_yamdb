@@ -9,6 +9,8 @@ from django.core.validators import (
 
 from users.models import User
 
+LENGTH_TEXT = 15
+
 
 def current_year():
     return datetime.date.today().year
@@ -145,7 +147,7 @@ class Review(models.Model):
         )
 
     def __str__(self):
-        return self.text[:15]
+        return self.text[:LENGTH_TEXT]
 
 
 @receiver([post_delete, post_save], sender=Review)
@@ -185,4 +187,4 @@ class Comment(models.Model):
         ordering = ['pub_date']
 
     def __str__(self):
-        return self.text[:15]
+        return self.text[:LENGTH_TEXT]

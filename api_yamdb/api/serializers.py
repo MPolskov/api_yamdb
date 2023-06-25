@@ -9,6 +9,7 @@ from reviews.models import Category, Genre, Title, Review, Comment
 REVIEW_ERROR = 'Можно оставить только 1 отзыв на произведение.'
 SCORE_ERROR = 'Выберите оценку от 1 до 10'
 TITLE_ERROR = 'Ожидался {0} вместо {1}'
+GENRE_NOTFOUND_ERROR = 'Жанр не найден'
 
 
 class CustomSlugRelatedField(serializers.SlugRelatedField):
@@ -61,20 +62,16 @@ class TitleSerializer(serializers.ModelSerializer):
         ret = super().to_internal_value(data)
         if slugs:
             self.type_validate(list, slugs)
-            result = []
             errors = OrderedDict()
             genres = Genre.objects.filter(slug__in=slugs)
+            genres_slug = genres.values_list('slug', flat=True)
             for slug in slugs:
                 self.type_validate(str, slug)
-                try:
-                    genre = genres.get(slug=slug)
-                except Genre.DoesNotExist as error:
-                    errors[slug] = error
-                else:
-                    result.append(genre)
+                if slug not in genres_slug:
+                    errors[slug] = GENRE_NOTFOUND_ERROR
             if errors:
                 raise ValidationError(errors)
-            ret['genre'] = result
+            ret['genre'] = list(genres)
         return ret
 
     def create(self, validated_data):
