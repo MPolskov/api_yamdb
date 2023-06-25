@@ -47,7 +47,7 @@ class TitleViewSet(ModelViewSet):
     permission_classes = (IsAdministratorOrReadOnly, )
 
     def get_serializer_class(self):
-        if self.action == 'list' or self.action == 'retrieve':
+        if self.action in ('list', 'retrieve'):
             return TitleListSerializer
         return TitleSerializer
 
